@@ -38,6 +38,12 @@ npx create-remix@latest --template https://github.com/jacob-ebey/remix-shadcn/tr
 
 ## Development
 
+Apply migrations:
+
+```sh
+npx wrangler d1 migrations apply DB --local
+```
+
 Run the Vite dev server:
 
 ```sh
@@ -46,34 +52,17 @@ npm run dev
 
 ## Deployment
 
-First, build your app for production:
+In the Cloudflare Dashboard:
 
-```sh
-npm run build
-```
+- Create a new Cloudflare Pages application
+- Set the `Build command` to `npm run build`
+- Set the `Build output directory` to `/build/client`
+- Set the environment variable `SESSION_SECRET` to an super duper secret and strong value
+- Deploy the app (it will be in a broken state, that's fine)
+- Create or or link an existing D1 database to the app as `DB`
 
-Setup your environment:
+In your project:
 
-```sh
-NODE_ENV='production'
-```
-
-Then run the app in production mode:
-
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `npm run build` and the server
-
-- `server.js`
-- `build/server`
-- `build/client`
-
-Take a look at the provided Dockerfile for further details on how to configure a production environment.
+- Update your wrangler.toml `database_id` to the ID of the linked D1 database you used above
+- Apply database migrations: `npx wrangler d1 migrations apply DB`
+- Commit and push to deploy your application

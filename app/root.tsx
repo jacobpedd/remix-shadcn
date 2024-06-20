@@ -5,45 +5,56 @@ import {
 	Scripts,
 	ScrollRestoration,
 	isRouteErrorResponse,
+	useNavigate,
 	useRouteError,
 } from "@remix-run/react";
+import * as React from "react";
+import { RouterProvider } from "react-aria-components";
 
 import { GlobalPendingIndicator } from "@/components/global-pending-indicator";
-import { Header } from "@/components/header";
 import {
 	ThemeSwitcherSafeHTML,
 	ThemeSwitcherScript,
 } from "@/components/theme-switcher";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
-function App({ children }: { children: React.ReactNode }) {
+function NavProvider({ children }: { children: React.ReactNode }) {
+	const navigate = useNavigate();
+	return <RouterProvider navigate={navigate}>{children}</RouterProvider>;
+}
+
+export function Layout({ children }: { children: React.ReactNode }) {
 	return (
-		<ThemeSwitcherSafeHTML lang="en">
-			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<Meta />
-				<Links />
-				<ThemeSwitcherScript />
-			</head>
-			<body>
-				<GlobalPendingIndicator />
-				<Header />
-				{children}
-				<ScrollRestoration />
-				<Scripts />
-			</body>
-		</ThemeSwitcherSafeHTML>
+		<NavProvider>
+			<ThemeSwitcherSafeHTML
+				lang="en"
+				className="touch-manipulation overflow-x-hidden"
+			>
+				<head>
+					<meta charSet="utf-8" />
+					<meta
+						name="viewport"
+						content="width=device-width, initial-scale=1, user-scalable=no"
+					/>
+					<Meta />
+					<Links />
+					<ThemeSwitcherScript />
+				</head>
+				<body>
+					<GlobalPendingIndicator />
+					<TooltipProvider>{children}</TooltipProvider>
+					<ScrollRestoration />
+					<Scripts />
+				</body>
+			</ThemeSwitcherSafeHTML>
+		</NavProvider>
 	);
 }
 
 export default function Root() {
-	return (
-		<App>
-			<Outlet />
-		</App>
-	);
+	return <Outlet />;
 }
 
 export function ErrorBoundary() {
@@ -62,11 +73,9 @@ export function ErrorBoundary() {
 	}
 
 	return (
-		<App>
-			<div className="container prose py-8">
-				<h1>{status}</h1>
-				<p>{message}</p>
-			</div>
-		</App>
+		<div className="container prose py-8">
+			<h1>{status}</h1>
+			<p>{message}</p>
+		</div>
 	);
 }
